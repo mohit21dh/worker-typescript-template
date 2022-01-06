@@ -1,18 +1,22 @@
-import { handleRequest } from '../src/handler'
+import { addGenericHeadersHandler } from '../src/handler'
 import makeServiceWorkerEnv from 'service-worker-mock'
 
 declare var global: any
 
-describe('handle', () => {
-  beforeEach(() => {
-    Object.assign(global, makeServiceWorkerEnv())
-    jest.resetModules()
-  })
 
-  test('handle GET', async () => {
-    const result = await handleRequest(new Request('/', { method: 'GET' }))
-    expect(result.status).toEqual(200)
-    const text = await result.text()
-    expect(text).toEqual('request method: GET')
+
+describe('worker', () => {
+  beforeEach(() => {
+    // Merge the Cloudflare Worker Environment into the global scope.
+    Object.assign(global, makeServiceWorkerEnv());
+    // Clear all module imports.
+    jest.resetModules();
+  });
+
+  it('should test generic handler', () => {
+    const resp = new Response();
+    const outputResponse = addGenericHeadersHandler(resp)
+    expect(resp.headers.get("Access-Control-Allow-Methods")).toBe("POST")
+    expect(outputResponse.headers.get("Access-Control-Allow-Methods")).toBe("POST")
   })
-})
+});
